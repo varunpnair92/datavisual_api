@@ -8,32 +8,17 @@ class DetailSerializer(serializers.ModelSerializer):
         fields = ["id", "entity", "details"]
 
 
-# class EntitySerializer(serializers.ModelSerializer):
-#     details = DetailSerializer(many=True, read_only=True)
-#     image_url = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = Entity
-#         fields = ["id", "dataset", "name", "volume", "image_url", "details"]
-
-#     def get_image_url(self, obj):
-#         request = self.context.get("request")
-#         if obj.image and hasattr(obj.image, "url"):   # assuming your model field is `image`
-#             url_path = obj.image.url
-#             if request:
-#                 return request.build_absolute_uri(url_path)
-#             return url_path
-#         return None
-
 class EntitySerializer(serializers.ModelSerializer):
     details = DetailSerializer(many=True, read_only=True)
     image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Entity
-        fields = ["id", "dataset", "name", "volume", "image", "image_url", "details"]
+        fields = ["id", "dataset", "name", "volume",
+                  "image", "image_url", "details"]
         extra_kwargs = {
-            "image": {"write_only": True},  # accept upload but don’t show raw field in output
+            # accept upload but don’t show raw field in output
+            "image": {"write_only": True},
         }
 
     def get_image_url(self, obj):
@@ -47,13 +32,16 @@ class EntitySerializer(serializers.ModelSerializer):
         return None
 
 
-
-
-
-
 class DatasetSerializer(serializers.ModelSerializer):
-    entities = EntitySerializer(many=True, read_only=True)
+    entities = serializers.SerializerMethodField()  # use method to sort
 
     class Meta:
         model = Dataset
         fields = ["id", "heading", "category", "data", "sort_by", "entities"]
+
+    def get_entities(self, obj):
+        # Always fetch a fresh queryset from the DB, sorted by volume
+        queryset = Entity.objects.filter(dataset=obj).order_by("volume")
+        return EntitySerializer(queryset, many=True, context=self.context).data
+
+

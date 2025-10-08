@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'pscdb',
         'USER': 'psc',
         'PASSWORD': 'psc',
-        'HOST': '150.230.141.120',
+        'HOST': 'localhost',
         'PORT': '5432',
         'OPTIONS': {
             'options': '-c search_path=visualization'

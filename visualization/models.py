@@ -14,7 +14,8 @@ class Dataset(models.Model):
 class Entity(models.Model):
     dataset = models.ForeignKey("Dataset", on_delete=models.CASCADE, related_name="entities")
     name = models.CharField(max_length=255)
-    volume = models.CharField(max_length=100, blank=True, null=True)
+    volume = models.FloatField(blank=True, null=True)  # <-- changed from CharField to FloatField
+
     image = models.ImageField(upload_to="entities/", blank=True, null=True)  # <-- changed
 
     def __str__(self):
